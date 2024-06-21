@@ -36,7 +36,11 @@ iv. “EFAULT” (Bad address): Error copying message from user space
 */
 int sys_mpi_send(pid_t pid, char *message, ssize_t message_size)
 {
-    
+    if (DEBUG) {
+        printk(KERN_ERR "*** ------------ our DEBUG --------------- *** \n");
+        printk(KERN_ERR "the message is: %s , and it length is: %d\n", message, message_size);
+        printk(KERN_ERR "*** -------------------------------------- *** \n");
+    }
     struct task_struct* receiver = find_task_by_pid(pid);
     struct task_struct* sender = current;
     pid_t my_pid = sender->pid;
@@ -77,9 +81,10 @@ if (!new_msg) {
     return -ENOMEM;
     //?????????????????
 }
+
 new_msg->sender_pid = pid;
-new_msg->size = message_size + 1;
-new_msg->data = kmalloc(new_msg->size, GFP_KERNEL);
+new_msg->size = message_size; 
+new_msg->data = kmalloc(message_size + 1 , GFP_KERNEL);
 if (!new_msg->data) {
     kfree(new_msg);
     return -ENOMEM;
@@ -93,7 +98,7 @@ if (copy_from_user(new_msg->data, message, message_size)) {
 new_msg->data[message_size] = '\0'; // Null-terminate the string
 
 INIT_LIST_HEAD(&new_msg->ptr);
-list_add(&new_msg->ptr, &receiver->comm_channel);  // Add to the beginning of the list
+list_add_tail(&new_msg->ptr, &receiver->comm_channel);  // Add to the end of the list
 return SUCCESS;
 }
 

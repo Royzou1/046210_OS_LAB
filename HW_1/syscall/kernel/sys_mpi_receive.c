@@ -41,6 +41,8 @@ int sys_mpi_receive(pid_t pid, char* message, ssize_t message_size) {
     //1 - not in communication
     if (task->comm_on == 0) {
         return -EPERM;
+        //errno = EPERM;
+        //return -1;
     }
 
     //2 - not valid
@@ -65,9 +67,8 @@ int sys_mpi_receive(pid_t pid, char* message, ssize_t message_size) {
             }
 
             // Null-terminate the string if there's space
-            if (copied_size < message_size) {
-                message[copied_size] = '\0';
-            }
+            message[copied_size] = '\0';
+            
 
             // Remove the message from the list
             list_del(&msg->ptr);
