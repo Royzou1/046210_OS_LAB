@@ -45,17 +45,13 @@ int sys_mpi_register(void)
     }
     
     p->comm_on = 1;
-    //list_t *msg_list_head = kmalloc(sizeof(list_t),GFP_KERNEL);
-    //struct list_head comm_list;
+   
     INIT_LIST_HEAD(&p->comm_channel);
     if (!list_empty(&p->comm_channel)) {
         if(DEBUG) printk(KERN_ERR "list isnt empty on init: %d\n", -ENOMEM);
         return -ENOMEM;
     }
-    // msg_list_head->prev = msg_list_head;
-    // msg_list_head->next = msg_list_head;
-    //p->comm_channel = comm_list;
-
+    
     return SUCCESS;
 }
     

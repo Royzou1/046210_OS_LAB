@@ -32,12 +32,16 @@ typedef struct message {
  *         iv. “EFAULT” (Bad address): error writing to user buffer
  */
 int sys_mpi_receive(pid_t pid, char* message, ssize_t message_size) {
+    printk(KERN_ERR "*** ------------ into receiving msg --------------- *** \n");
+     
     struct task_struct *task = current;
     if (!task) {
         if (DEBUG) { printk(KERN_ERR "didn't find task_struct: %d\n", -ENOMEM); }
         return FAIL;
     }
-
+    if (DEBUG) {
+        printk(KERN_ERR "I am: %d, receiving from: %d\n", task->pid, pid);
+    }
     //1 - not in communication
     if (task->comm_on == 0) {
         return -EPERM;
@@ -53,11 +57,17 @@ int sys_mpi_receive(pid_t pid, char* message, ssize_t message_size) {
     message_t *msg;
     struct list_head *pos, *n;
     int copied_size;
-
+    if (DEBUG) { printk(KERN_ERR "start to search in the list \n"); }
     // Iterate over the incoming messages list
     list_for_each_safe(pos, n, &task->comm_channel) {
         msg = list_entry(pos, message_t, ptr);
+        if (DEBUG) { 
+            printk(KERN_ERR "current sender is: %d\n",msg->sender_pid); 
+        }
+
         if (msg->sender_pid == pid) {
+            if (DEBUG) { printk(KERN_ERR "in if loop, found message with good pid\n"); }
+            
             // Determine the number of bytes to copy
             copied_size = min(msg->size, (size_t)message_size);
 
@@ -78,9 +88,15 @@ int sys_mpi_receive(pid_t pid, char* message, ssize_t message_size) {
             kfree(msg);
             return copied_size;  // Return the size of the copied message
         }
+        if (DEBUG) { 
+            printk(KERN_ERR "not the right sender"); 
+        }
     }
 
     // No message found from the given pid
+    if (DEBUG) { 
+            printk(KERN_ERR "did not find the right sender"); 
+        }
     return -EAGAIN; 
     }
     
