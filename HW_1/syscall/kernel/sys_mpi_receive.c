@@ -10,6 +10,7 @@
 #define FAIL -1
 #define SUCCESS 0
 #define DEBUG 1
+#define DEBUG_MEM 1
 
 typedef struct message {
     pid_t sender_pid;
@@ -35,13 +36,13 @@ int sys_mpi_receive(pid_t pid, char* message, ssize_t message_size) {
     printk(KERN_ERR "*** ------------ into receiving msg --------------- *** \n");
      
     struct task_struct *task = current;
-    if (!task) {
-        if (DEBUG) { printk(KERN_ERR "didn't find task_struct: %d\n", -ENOMEM); }
-        return FAIL;
-    }
-    if (DEBUG) {
-        printk(KERN_ERR "I am: %d, receiving from: %d\n", task->pid, pid);
-    }
+        if (!task) {
+            if (DEBUG) { printk(KERN_ERR "didn't find task_struct: %d\n", -ENOMEM); }
+            return FAIL;
+        }
+        if (DEBUG) {
+            printk(KERN_ERR "I am: %d, receiving from: %d\n", task->pid, pid);
+        }
     //1 - not in communication
     if (task->comm_on == 0) {
         return -EPERM;
@@ -81,10 +82,19 @@ int sys_mpi_receive(pid_t pid, char* message, ssize_t message_size) {
             
 
             // Remove the message from the list
+            if (DEBUG_MEM) {
+			    kprint(KERN_ERR "free: %d \n", msg->ptr);
+		    }
             list_del(&msg->ptr);
 
             // Free the message data and structure
+            if (DEBUG_MEM) {
+			    kprint(KERN_ERR "free: %d \n", msg->data);
+		    }
             kfree(msg->data);
+            if (DEBUG_MEM) {
+			    kprint(KERN_ERR "free: %d \n", msg);
+		    }
             kfree(msg);
             return copied_size;  // Return the size of the copied message
         }

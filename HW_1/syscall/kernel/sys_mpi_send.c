@@ -99,9 +99,10 @@ int sys_mpi_send(pid_t pid, char *message, ssize_t message_size)
         return -ENOMEM;
         //?????????????????
     }
+    if(DEBUG)printk(KERN_ERR "malloc: %d \n",new_msg);
 
     if (DEBUG) { //////////////
-        printk(KERN_ERR "Msg was alocated\n");
+        printk(KERN_ERR "Msg was allocated\n");
     }
 
     new_msg->sender_pid = sender->pid;
@@ -109,8 +110,11 @@ int sys_mpi_send(pid_t pid, char *message, ssize_t message_size)
     new_msg->data = kmalloc(message_size + 1 , GFP_KERNEL);
     if (!new_msg->data) {
         kfree(new_msg);
+        if(DEBUG)printk(KERN_ERR "free: %d \n",new_msg);
         return -ENOMEM;
     }
+    if(DEBUG)printk(KERN_ERR "malloc: %d \n",data);
+
 
     if (copy_from_user(new_msg->data, message, message_size)) {
         kfree(new_msg->data);

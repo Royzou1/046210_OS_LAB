@@ -29,6 +29,8 @@
 #include <asm/uaccess.h>
 #include <asm/mmu_context.h>
 
+#define DEBUG_MEM
+
 /* The idle threads do not count.. */
 int nr_threads;
 
@@ -614,8 +616,10 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	*p = *current;
 	/*communication handler--------------------------------------------------*/
 	if (p->comm_on == 1) {
-		//kprint(KERN_ERR "in the if statement, fork, line 617 \n");
 		INIT_LIST_HEAD(&p->comm_channel);
+		if (DEBUG_MEM) {
+			kprint(KERN_ERR "malloc: %d \n" , p->comm_channel);
+		}
 	}
 	/*end *******************/
 

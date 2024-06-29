@@ -21,6 +21,8 @@
 #include <asm/pgtable.h>
 #include <asm/mmu_context.h>
 
+#define DEBUG_MEM 1
+
 typedef struct message
 {
     pid_t seder_pid;
@@ -58,11 +60,22 @@ static void release_task(struct task_struct * p)
     	message_t *curr_msg;
 
     	list_for_each_safe(pos, temp, &p->comm_channel) {
-        curr_msg = list_entry(pos, message_t, ptr);
-        list_del(pos);
-        kfree(curr_msg->data); // Free the data pointer
-        kfree(curr_msg); // Free the message entry itself
-    }
+			curr_msg = list_entry(pos, message_t, ptr);
+			if (DEBUG_MEM) {
+				printk(KERN_ERR "list del: %d\n", pos);
+			}
+			list_del(pos);
+		
+			if (DEBUG_MEM) {
+				printk(KERN_ERR "Free: %d\n", curr_msg->data);
+			}
+			kfree(curr_msg->data); // Free the data pointer
+			
+			if (DEBUG_MEM) {
+				printk(KERN_ERR "Free: %d\n", curr_msg);
+			}
+			kfree(curr_msg); // Free the message entry itself
+    	}
 
 	}
 	/*end-----------------------------------------------------------------*/
