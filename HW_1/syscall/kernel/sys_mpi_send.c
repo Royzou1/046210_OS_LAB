@@ -7,6 +7,8 @@
 #include <linux/slab.h> // For kmalloc and kfree
 #include <linux/errno.h> 
 #include <linux/string.h> 
+#include <linux/helper.h>
+
 
 #define FAIL -1
 #define SUCCESS 0
@@ -94,34 +96,29 @@ int sys_mpi_send(pid_t pid, char *message, ssize_t message_size)
     }
     message_t *new_msg;
 
-    new_msg = kmalloc(sizeof(message_t), GFP_KERNEL);
+    new_msg = our_kmalloc(sizeof(message_t), GFP_KERNEL);
     if (!new_msg) {
         return -ENOMEM;
         //?????????????????
     }
-    if(DEBUG)printk(KERN_ERR "malloc: %d \n",new_msg);
 
-    if (DEBUG) { //////////////
-        printk(KERN_ERR "Msg was allocated\n");
-    }
 
     new_msg->sender_pid = sender->pid;
     new_msg->size = message_size; 
-    new_msg->data = kmalloc(message_size + 1 , GFP_KERNEL);
+    new_msg->data = our_kmalloc(message_size + 1 , GFP_KERNEL);
     if (!new_msg->data) {
-        kfree(new_msg);
-        if(DEBUG)printk(KERN_ERR "free: %d \n",new_msg);
+        our_kfree(new_msg);
         return -ENOMEM;
     }
-    if(DEBUG)printk(KERN_ERR "malloc: %d \n",data);
 
 
     if (copy_from_user(new_msg->data, message, message_size)) {
-        kfree(new_msg->data);
-        kfree(new_msg);
+        our_kfree(new_msg->data);
+        our_kfree(new_msg);
         return -EFAULT;
     }
     new_msg->data[message_size] = '\0'; // Null-terminate the string
+    
 
     if (DEBUG) { ////////////
         printk(KERN_ERR "msg was created\n");

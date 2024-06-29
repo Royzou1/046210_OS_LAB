@@ -452,7 +452,7 @@ struct task_struct {
 /* journalling filesystem info */
 	void *journal_info;
 
-/*my shit -----------------------------------------------------------*/
+/*communication channel -----------------------------------------------------------*/
 	int comm_on;
 	struct list_head comm_channel; 
 

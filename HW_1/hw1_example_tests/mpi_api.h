@@ -1,44 +1,82 @@
-#ifndef MPI_API_H_
-#define MPI_API_H_
+#include <sys/types.h>  // For pid_t
+#include <errno.h>      // For errno
+#include <unistd.h>   
 
+int mpi_register(void) {
+    int res;
+    __asm__
+    (
+    "pushl %%eax;"
+    "movl $243, %%eax;"
+    "int $0x80;"
+    "movl %%eax,%0;"
+    "popl %%eax;"
+    : "=m" (res)
+    );
+    if (res < 0)
+    {
+        errno = -res;
+        res = -1;
+    }
+    return res;
+}
 
-/**
- * @brief Register for MPI communication the calling process,
-          on failure, errno: ENOMEM
- * @return FAIL: -1 ; SUCCESS: 0
-*/
-int mpi_register(void);
+int mpi_send(pid_t pid, char *message, ssize_t message_size) {
+    int res;
+    __asm__
+    (
+        "pushl %%eax;"
+        "pushl %%ebx;"
+        "pushl %%ecx;"
+        "pushl %%edx;"
+        "movl $244, %%eax;"
+        "movl %1, %%ebx;"
+        "movl %2, %%ecx;"
+        "movl %3, %%edx;"
+        "int $0x80;"
+        "movl %%eax,%0;"
+        "popl %%edx;"
+        "popl %%ecx;"
+        "popl %%ebx;"
+        "popl %%eax;"
+        : "=m" (res)
+        : "m" (pid) ,"m" (message) ,"m"(message_size)
+    );
+    if (res < 0)
+    {
+        errno = -res;
+        res = -1;
+    }
+    return res;
 
-/**
- * @brief send a message of size message_size to the process pid
- * @param pid_t pid - the process that recieves the msg.
- * @param char* message - the message to send.
- * @param ssize_t message_size - the size of the message.
- * @return FAIL: -1 ; SUCCESS: 0
- * @errno:  i. “ESRCH” (No such process): Process pid doesn’t exist
-            ii. “EPERM” (Operation not permitted): Either the sending process or pid isn’t registered
-                for MPI communication
-            iii. “EINVAL” (Invalid argument): message is NULL or message_size < 1
-            iv. “EFAULT” (Bad address): Error copying message from user space
-*/
-int mpi_send(pid_t pid, char *message, ssize_t message_size);
+}
 
-/**
-* @brief Check if the current process has a message from process pid.
-         If there is, copy it to the buffer message with size message_size and 
-         delete it from the incoming messages queue. Messages are processed in 
-         the order they were received. If the message is longer than message_size,
-        copy only the first message_size bytes and delete the message from the queue.
-* @return FAIL: -1 ; SUCCESS: The size of the string copied to message.
-* @errno: i. “EPERM” (Operation not permitted): The current process isn’t 
-             registered for MPI communication
-         ii. “EINVAL” (Invalid argument): message is NULL or message_size < 1
-         iii. “EAGAIN” (Resource temporarily unavailable): No message found from pid
-         iv. “EFAULT” (Bad address): error writing to user buffer
-*/
-int mpi_receive(pid_t pid, char* message, ssize_t message_size);
+int mpi_receive(pid_t pid, char* message, ssize_t message_size) {
+    int res;
+    __asm__
+    (
+        "pushl %%eax;"
+        "pushl %%ebx;"
+        "pushl %%ecx;"
+        "pushl %%edx;"
+        "movl $245, %%eax;"
+        "movl %1, %%ebx;"
+        "movl %2, %%ecx;"
+        "movl %3, %%edx;"
+        "int $0x80;"
+        "movl %%eax,%0;"
+        "popl %%edx;"
+        "popl %%ecx;"
+        "popl %%ebx;"
+        "popl %%eax;"
+        : "=m" (res)
+        : "m" (pid) ,"m" (message) ,"m"(message_size)
+    );
+    if (res < 0)
+    {
+        errno = -res;
+        res = -1;
+    }
+    return res;
+}
 
-
-
-#endif
-#endif

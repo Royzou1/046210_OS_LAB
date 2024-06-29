@@ -12,7 +12,6 @@
 #define FAIL -1
 #define SUCCESS 0
 #define DEBUG 1
-#define DEBUG_MEM 1
 
 typedef struct message
 {
@@ -48,12 +47,12 @@ int sys_mpi_register(void)
     p->comm_on = 1;
    
     INIT_LIST_HEAD(&p->comm_channel);
+
     if (!list_empty(&p->comm_channel)) {
-        if(DEBUG_MEM) printk(KERN_ERR "list isnt empty on init: %d\n", -ENOMEM);
+        if(DEBUG) printk(KERN_ERR "list isnt empty on init: %d\n", -ENOMEM);
         return -ENOMEM;
     }
-    if(DEBUG_MEM)printk(KERNN_ERR "list created in %d\n",pid)
-    
+   
     return SUCCESS;
 }
     

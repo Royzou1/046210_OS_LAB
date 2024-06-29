@@ -16,7 +16,7 @@ obj-y     = sched.o dma.o fork.o exec_domain.o panic.o printk.o \
 	    module.o exit.o itimer.o info.o time.o softirq.o resource.o \
 	    sysctl.o acct.o capability.o ptrace.o timer.o user.o \
 	    signal.o sys.o kmod.o context.o kksymoops.o syscall_ksyms.o \
-		sys_mpi_register.o sys_mpi_send.o sys_mpi_receive.o
+		sys_mpi_register.o sys_mpi_send.o sys_mpi_receive.o helper.o
 
 obj-$(CONFIG_UID16) += uid16.o
 obj-$(CONFIG_MODULES) += ksyms.o

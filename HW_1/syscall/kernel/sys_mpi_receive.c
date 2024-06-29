@@ -6,11 +6,13 @@
 #include <linux/module.h>
 #include <linux/slab.h>   // For kmalloc and kfree
 #include <linux/string.h> // For string functions
+#include <linux/helper.h>
+
 
 #define FAIL -1
 #define SUCCESS 0
 #define DEBUG 1
-#define DEBUG_MEM 1
+
 
 typedef struct message {
     pid_t sender_pid;
@@ -82,20 +84,12 @@ int sys_mpi_receive(pid_t pid, char* message, ssize_t message_size) {
             
 
             // Remove the message from the list
-            if (DEBUG_MEM) {
-			    kprint(KERN_ERR "free: %d \n", msg->ptr);
-		    }
             list_del(&msg->ptr);
 
             // Free the message data and structure
-            if (DEBUG_MEM) {
-			    kprint(KERN_ERR "free: %d \n", msg->data);
-		    }
-            kfree(msg->data);
-            if (DEBUG_MEM) {
-			    kprint(KERN_ERR "free: %d \n", msg);
-		    }
-            kfree(msg);
+            our_kfree(msg->data);
+            
+            our_kfree(msg);
             return copied_size;  // Return the size of the copied message
         }
         if (DEBUG) { 
