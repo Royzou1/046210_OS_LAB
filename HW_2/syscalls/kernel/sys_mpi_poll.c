@@ -35,6 +35,12 @@ typedef struct message
  */
 int is_incoming_msg_from(pid_t pid) 
 {
+    struct task_struct *sender = find_task_by_pid(pid);
+    if(sender == NULL)
+    {
+        printk(KERN_ERR "sender do not exist\n");
+        return 0;
+    } 
     struct task_struct *task = current;
     struct list_head *pos;
     message_t *msg;
@@ -156,7 +162,6 @@ int sys_mpi_poll(struct mpi_poll_entry* poll_pids, int npids, int timeout)
                 poll_pids_ker[i].incoming = 0;
             }
         }
-        num_of_senders = (num_of_senders == 0) ? -1 : num_of_senders;
 
         debug_print("*** here11 *** \n");
         //free list
@@ -186,6 +191,8 @@ int sys_mpi_poll(struct mpi_poll_entry* poll_pids, int npids, int timeout)
     
     if (DEBUG) { printk(KERN_ERR "Returning with value: %d\n", num_of_senders); }
     debug_print("*** ------------ Done with polling msg --------------- *** \n");
-
+    
+    if(num_of_senders == 0)
+        return -ETIMEDOUT;
     return num_of_senders;
 }

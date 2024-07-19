@@ -44,17 +44,6 @@ int sys_mpi_send(pid_t pid, char *message, ssize_t message_size)
     
     struct task_struct* receiver = find_task_by_pid(pid);
     struct task_struct* sender = current;
-
-
-    if (DEBUG) {
-        printk(KERN_ERR "sender is: %d, receiver is %d",sender->pid, receiver->pid);
-    }
-
-    if (DEBUG) { ////////////
-        printk(KERN_ERR "got both task structs \n");
-    }
-    
-    //receiver doesn't exist
     if(receiver == NULL)
     {
         if(DEBUG) printk(KERN_ERR "error in get task_struct on proccess %d \n", pid);
@@ -67,6 +56,17 @@ int sys_mpi_send(pid_t pid, char *message, ssize_t message_size)
         if(DEBUG) printk(KERN_ERR "error in get task_struct pf sender \n");
         return -ESRCH;
     }
+
+    if (DEBUG) {
+        printk(KERN_ERR "sender is: %d, receiver is %d",sender->pid, receiver->pid);
+    }
+
+    if (DEBUG) { ////////////
+        printk(KERN_ERR "got both task structs \n");
+    }
+    
+    //receiver doesn't exist
+    
     pid_t my_pid = sender->pid;
 
     if (DEBUG) { /////////////

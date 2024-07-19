@@ -5,19 +5,32 @@ import errno
 import pyMpi
 import time
 
-def test0():
-    print("**********************starting test 0******************************")
-    cpid1 = os.fork()
-    if cpid1 == 0:
-        print('Proc1 pid: ' , os.getpid())
-        os._exit(0)
-    _, status = os.waitpid(cpid1, 0)  # Wait for child1 to finish
-    cpid2 = os.fork()
-    if cpid2 == 0:
-        print('Proc2 pid: ' , os.getpid())
-        os._exit(0)
-    _, status = os.waitpid(cpid2, 0)  # Wait for child1 to finish
-    print("**********************end of test 0******************************")
+def testErrno() :
+    print("**********************starting test Errno*************************")
+
+    ppid = os.getpid()
+
+    try:
+        poll_ret = pyMpi.poll([ppid + 10], 5)
+    except Exception, ex:
+        assert (ex.errno == errno.EPERM)
+
+    pyMpi.register()
+    try:
+        poll_ret = pyMpi.poll([ppid], 5)
+    except Exception, ex:
+        assert (ex.errno == errno.ETIMEDOUT)
+    
+    try:
+        poll_ret = pyMpi.poll([], 5)
+    except Exception, ex:
+        assert (ex.errno == errno.EINVAL)
+
+    try:
+        poll_ret = pyMpi.poll([ppid], -1)
+    except Exception, ex:
+        assert (ex.errno == errno.EINVAL)
+
     
 
 def test1():
@@ -35,9 +48,11 @@ def test1():
     # In parent: poll for new messages from the child. Python converts
     # struct mpi_poll_entry to a list of PIDs with incoming messages.
     s = time.time()
-    poll_ret = pyMpi.poll([cpid], 10)
+    poll_ret = pyMpi.poll([cpid], 15)
+    print("after poll_ret ---")
     e = time.time()
     elapsed = e - s
+    print('elapsed time is: ', elapsed)
     # Elasped time should be about the same as the child's wait time
     print("type of poll_ret is: ", type(poll_ret),"     ")
     assert (elapsed > 2 and elapsed < 4)
@@ -166,21 +181,23 @@ def test6():
     cpid1 = os.fork()
     if cpid1 == 0:
         pyMpi.send(ppid, "Hello1!")
+        print("the msg was sent")
         os._exit(0)
     _, status = os.waitpid(cpid1, 0)  # Wait for child1 to finish
     
     time.sleep(1)
     try:
-        message = pyMpi.recieve(cpid1 , 100)
+        print('try receive msg')
+        pyMpi.poll([cpid1] , 1)
         print (message)
     except Exception, ex:
         print("The exception is: " , ex)
     
-    print("**********************end of test 5******************************")
+    print("**********************end of test 6******************************")
 
 if __name__ == "__main__":
     print("**********************tests**************************************")
-    test0()
+    testErrno()
     test1()
     test2()
     test3()

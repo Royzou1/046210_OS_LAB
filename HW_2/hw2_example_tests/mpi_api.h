@@ -89,7 +89,6 @@ int mpi_receive(pid_t pid, char* message, ssize_t message_size) {
 int mpi_poll(struct mpi_poll_entry *poll_pids, int npids, int timeout)
 {
     int res;
-    printf("proc1 is: %d, incomming is: %d\n", poll_pids[0].pid , poll_pids[0].incoming);
     __asm__
     (
         "pushl %%eax;"
@@ -109,13 +108,10 @@ int mpi_poll(struct mpi_poll_entry *poll_pids, int npids, int timeout)
         : "=m" (res)
         : "m" (poll_pids) ,"m" (npids) ,"m"(timeout)
     );
-    printf("poll pids  ----- pid: %d , incoming: %d\n",poll_pids[0].pid, poll_pids[0].incoming);
-    printf("--%d ------------\n", res);
     if (res < 0)
     {
         errno = -res;
         res = -1;
     }
-    printf("proc1 is: %d, incomming is: %d\n", poll_pids[0].pid , poll_pids[0].incoming);
     return res;
 }

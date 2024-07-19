@@ -77,9 +77,7 @@ py_receive(PyObject *self, PyObject *args)
 static PyObject *
 py_poll(PyObject *self, PyObject *args)
 {
-    //
-    printf("testing print py_poll\n");
-    //
+
     PyObject *pids;
     int timeout, npids;
     struct mpi_poll_entry *poll_entries;
@@ -100,15 +98,11 @@ py_poll(PyObject *self, PyObject *args)
     }
 
     incoming_count = mpi_poll(poll_entries, npids, timeout);
-    printf("proc1 is: %d, incomming is: %d\n", poll_entries[0].pid , poll_entries[0].incoming);
     if (incoming_count < 0) {
         free(poll_entries);
         return posix_error();
     }
 
-    //
-    printf("proc1 is: %d, incomming is: %d\n", poll_entries[0].pid , poll_entries[0].incoming);
-    //
     incoming_pids = PyTuple_New(incoming_count);
     if (!incoming_pids) {
         free(poll_entries);
@@ -119,22 +113,12 @@ py_poll(PyObject *self, PyObject *args)
         if (poll_entries[i].incoming == 1) {
             if (PyTuple_SetItem(incoming_pids, j, PyInt_FromLong(poll_entries[i].pid)) != 0) {
                 free(poll_entries);
-                //
-                printf("NULL exit : PyTuple\n");
-                //
                 return NULL;
             }
             j++;
         }
     }
     free(poll_entries);
-
-    //
-    printf("incomming pid == %p\n" , incoming_pids);
-    //
-    printf("proc1 is: %d, incomming is: %d\n", poll_entries[0].pid , poll_entries[0].incoming);
-    //
-    //
 
 
     return incoming_pids;
