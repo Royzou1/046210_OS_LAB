@@ -1,0 +1,7 @@
+[root@localhost hw2_example_tests]# ./hw2_test.py
+Traceback (most recent call last):
+  File "./hw2_test.py", line 29, in ?
+    test1()
+  File "./hw2_test.py", line 21, in test1
+    poll_ret = pyMpi.poll([cpid], 10)
+OSError: [Errno 1] Operation not permitted
